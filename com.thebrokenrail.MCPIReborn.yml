@@ -39,7 +39,7 @@ rename-icon: minecraft-pi-reborn-client
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.2.10
+  tag: 2.2.11
   disable-shallow-clone: true
 
 # Build
