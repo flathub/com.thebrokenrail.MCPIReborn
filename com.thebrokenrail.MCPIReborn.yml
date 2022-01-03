@@ -10,7 +10,7 @@ tags:
 # Runtime/SDK
 runtime: org.freedesktop.Platform
 # Newer Runtimes Don't Support ARM Multiarch
-runtime-version: '19.08'
+runtime-version: '21.08'
 sdk: org.freedesktop.Sdk
 
 # Startup Command
