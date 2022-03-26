@@ -21,36 +21,27 @@ finish-args:
   - --persist=.minecraft-pi
   - --share=ipc
   - --socket=x11
+  - --socket=wayland
   - --share=network
   - --device=dri
   - --socket=pulseaudio
   - --allow=multiarch
+  - --env=APPDIR=/app
 
 # Multiarch
 sdk-extensions:
   - org.freedesktop.Sdk.Compat.arm
   - org.freedesktop.Sdk.Extension.toolchain-arm
 
-# Desktop
-rename-desktop-file: minecraft-pi-reborn-client.desktop
-rename-icon: minecraft-pi-reborn-client
-
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.2.11
+  tag: 2.3.2
   disable-shallow-clone: true
 
 # Build
 modules:
-  # Zenity
-  - name: zenity
-    buildsystem: meson
-    sources:
-      - type: git
-        url: https://gitlab.gnome.org/GNOME/zenity.git
-        tag: 3.41.0
   # QEMU
   - name: qemu-arm
     config-opts:
@@ -98,6 +89,12 @@ modules:
         sha256: 68e15d8e45ac56326e0b9a4afa8b49a3dfe8aba3488221d098c84698bca65b45
       - type: patch
         path: qemu-arm.patch
+  # patchelf
+  - name: patchelf
+    sources:
+      - type: git
+        url: https://github.com/NixOS/patchelf.git
+        tag: 0.14.3
   # MCPI-Reborn Native Code
   - name: minecraft-pi-reborn-native
     buildsystem: cmake
@@ -105,25 +102,18 @@ modules:
       - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
       - -DMCPI_BUILD_MODE=native
       - -DMCPI_OPEN_SOURCE_ONLY=ON
+      - -DMCPI_IS_APPIMAGE_BUILD=ON
       # Use GCC
       - -DCMAKE_C_COMPILER=gcc
       - -DCMAKE_CXX_COMPILER=g++
     sources:
       - *mcpi-reborn-git
+      - type: patch
+        path: glfw-wayland-build-fix.patch
+        options:
+          - --directory=dependencies/glfw/src
     # Nested Build
     modules:
-      # GLFW
-      - name: glfw
-        buildsystem: cmake-ninja
-        config-opts:
-          - -DBUILD_SHARED_LIBS:BOOL=ON
-          - -DGLFW_BUILD_EXAMPLES:BOOL=OFF
-          - -DGLFW_BUILD_TESTS:BOOL=OFF
-          - -DGLFW_BUILD_DOCS:BOOL=OFF
-        sources:
-          - type: git
-            url: https://github.com/glfw/glfw.git
-            tag: 3.3.6
       # FreeImage
       - name: freeimage
         no-autogen: true
@@ -147,6 +137,7 @@ modules:
       - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
       - -DMCPI_BUILD_MODE=arm
       - -DMCPI_OPEN_SOURCE_ONLY=ON
+      - -DMCPI_IS_APPIMAGE_BUILD=ON
       # ARM Toolchain
       - -DCMAKE_TOOLCHAIN_FILE=flatpak-arm-toolchain.cmake
     build-options:
@@ -159,6 +150,12 @@ modules:
       - *mcpi-reborn-git
       - type: file
         path: flatpak-arm-toolchain.cmake
+  # Workaround https://github.com/hughsie/appstream-glib/issues/271
+  - name: workaround-appstream-issue
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/usr/share/icons/hicolor/scalable/apps
+      - ln -s ../../../../../../share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png /app/usr/share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png
   # Multiarch Setup
   ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
   - name: multiarch-setup
@@ -170,7 +167,8 @@ modules:
       - cp -Lp /lib/arm-linux-gnueabihf/libgcc_s.so.1 /app/lib/minecraft-pi-reborn-client/lib
       - cp -Lp /lib/arm-linux-gnueabihf/libpthread.so.0 /app/lib/minecraft-pi-reborn-client/lib
       - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 /app/lib/minecraft-pi-reborn-client/lib
+      - mkdir -p /app/usr/arm-linux-gnueabihf/lib
+      - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 /app/usr/arm-linux-gnueabihf/lib
   # AppData File
   - name: appdata
     buildsystem: simple
@@ -197,14 +195,6 @@ modules:
         commands:
           - tar -xf mcpi.tar.gz --strip-components 1
           - rm -f mcpi.tar.gz
-          # Patch Binary Interpreter
-          - patchelf --set-interpreter /app/lib/minecraft-pi-reborn-client/lib/ld-linux-armhf.so.3 /app/extra/minecraft-pi
-    modules:
-      - name: patchelf
-        sources:
-          - type: git
-            url: https://github.com/NixOS/patchelf.git
-            tag: 0.14.3
 
 # Cleanup
 cleanup:
