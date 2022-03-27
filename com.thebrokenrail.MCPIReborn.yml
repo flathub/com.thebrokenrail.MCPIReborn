@@ -161,6 +161,13 @@ modules:
     build-commands:
       - mkdir -p /app/usr/share/icons/hicolor/scalable/apps
       - ln -s ../../../../../../share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png /app/usr/share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png
+  # Fix AppStream ID
+  - name: fix-appstream-id
+    buildsystem: simple
+    build-commands:
+      - sed -i 's/MCPIRebornClient/MCPIReborn/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
+    ensure-writable:
+      - /share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
   # Multiarch Setup
   ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
   - name: multiarch-setup
