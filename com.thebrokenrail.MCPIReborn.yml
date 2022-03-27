@@ -33,11 +33,16 @@ sdk-extensions:
   - org.freedesktop.Sdk.Compat.arm
   - org.freedesktop.Sdk.Extension.toolchain-arm
 
+# Desktop
+rename-desktop-file: com.thebrokenrail.MCPIRebornClient.desktop
+rename-icon: com.thebrokenrail.MCPIRebornClient
+rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
+
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.2
+  tag: 2.3.3
   disable-shallow-clone: true
 
 # Build
@@ -169,14 +174,6 @@ modules:
       - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 /app/lib/minecraft-pi-reborn-client/lib
       - mkdir -p /app/usr/arm-linux-gnueabihf/lib
       - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 /app/usr/arm-linux-gnueabihf/lib
-  # AppData File
-  - name: appdata
-    buildsystem: simple
-    build-commands:
-      - install -Dp -m 644 com.thebrokenrail.MCPIReborn.appdata.xml /app/share/appdata/com.thebrokenrail.MCPIReborn.appdata.xml
-    sources:
-      - type: file
-        path: com.thebrokenrail.MCPIReborn.appdata.xml
   # Download MCPI Separately At Installation-Time
   - name: mcpi
     buildsystem: simple
