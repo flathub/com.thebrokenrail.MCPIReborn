@@ -166,6 +166,7 @@ modules:
     buildsystem: simple
     build-commands:
       - sed -i 's/MCPIRebornClient/MCPIReborn/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
+      - sed -i 's/<\/component>/<releases><release version="Release" date="2000-01-01"><\/release><\/releases><\/component>/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
     ensure-writable:
       - /share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
   # Multiarch Setup
