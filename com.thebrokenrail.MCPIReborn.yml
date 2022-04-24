@@ -28,11 +28,6 @@ finish-args:
   - --allow=multiarch
   - --env=APPDIR=/app
 
-# Multiarch
-sdk-extensions:
-  - org.freedesktop.Sdk.Compat.arm
-  - org.freedesktop.Sdk.Extension.toolchain-arm
-
 # Desktop
 rename-desktop-file: com.thebrokenrail.MCPIRebornClient.desktop
 rename-icon: com.thebrokenrail.MCPIRebornClient
@@ -47,65 +42,18 @@ x-mcpi-reborn-git: &mcpi-reborn-git
 
 # Build
 modules:
-  # QEMU
-  - name: qemu-arm
-    config-opts:
-      - --prefix=/app
-      - --target-list=arm-linux-user
-      - --enable-linux-user
-      - --disable-debug-info
-      - --disable-bsd-user
-      - --disable-werror
-      - --disable-system
-      - --disable-tools
-      - --disable-docs
-      - --disable-gtk
-      - --disable-gnutls
-      - --disable-nettle
-      - --disable-gcrypt
-      - --disable-glusterfs
-      - --disable-libnfs
-      - --disable-libiscsi
-      - --disable-vnc
-      - --disable-kvm
-      - --disable-libssh
-      - --disable-libxml2
-      - --disable-vde
-      - --disable-sdl
-      - --disable-opengl
-      - --disable-xen
-      - --disable-fdt
-      - --disable-vhost-net
-      - --disable-vhost-crypto
-      - --disable-vhost-user
-      - --disable-vhost-vsock
-      - --disable-vhost-scsi
-      - --disable-tpm
-      - --disable-qom-cast-debug
-      - --disable-capstone
-      - --disable-zstd
-      - --disable-linux-io-uring
-      - --disable-bpf
-    cleanup:
-      - /share
-    sources:
-      - type: archive
-        url: https://download.qemu.org/qemu-6.2.0.tar.xz
-        sha256: 68e15d8e45ac56326e0b9a4afa8b49a3dfe8aba3488221d098c84698bca65b45
-      - type: patch
-        path: qemu-arm.patch
   # patchelf
   - name: patchelf
     sources:
       - type: git
         url: https://github.com/NixOS/patchelf.git
         tag: 0.14.3
-  # MCPI-Reborn Native Code
-  - name: minecraft-pi-reborn-native
+  # MCPI-Reborn Code
+  - name: minecraft-pi-reborn
     buildsystem: cmake
     config-opts:
       - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
-      - -DMCPI_BUILD_MODE=native
+      - -DMCPI_BUILD_MODE=both
       - -DMCPI_OPEN_SOURCE_ONLY=ON
       - -DMCPI_IS_APPIMAGE_BUILD=ON
       # Use GCC
@@ -135,27 +83,6 @@ modules:
             commands:
               - sed -i 's|-o root -g root ||' ./Makefile.gnu
               - sed -i 's|/usr|/app|' ./Makefile.gnu
-  # MCPI-Reborn ARM Code
-  - name: minecraft-pi-reborn-arm
-    buildsystem: cmake
-    config-opts:
-      - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
-      - -DMCPI_BUILD_MODE=arm
-      - -DMCPI_OPEN_SOURCE_ONLY=ON
-      - -DMCPI_IS_APPIMAGE_BUILD=ON
-      # ARM Toolchain
-      - -DCMAKE_SYSTEM_NAME=Linux
-      - -DCMAKE_C_COMPILER=arm-unknown-linux-gnueabihf-gcc
-      - -DCMAKE_CXX_COMPILER=arm-unknown-linux-gnueabihf-g++
-      - -DCMAKE_SYSTEM_PROCESSOR=arm
-    build-options:
-      prepend-path: /usr/lib/sdk/toolchain-arm/bin
-      env:
-        # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
-        CFLAGS: ''
-        CXXFLAGS: ''
-    sources:
-      - *mcpi-reborn-git
   # Workaround https://github.com/hughsie/appstream-glib/issues/271
   - name: workaround-appstream-issue
     buildsystem: simple
@@ -170,19 +97,6 @@ modules:
       - sed -i 's/<\/component>/<releases><release version="Release" date="2000-01-01"><\/release><\/releases><\/component>/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
     ensure-writable:
       - /share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
-  # Multiarch Setup
-  ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
-  - name: multiarch-setup
-    buildsystem: simple
-    build-commands:
-      - cp -Lp /lib/arm-linux-gnueabihf/libc.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libm.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libstdc++.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libgcc_s.so.1 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libpthread.so.0 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 /app/lib/minecraft-pi-reborn-client/lib
-      - mkdir -p /app/usr/arm-linux-gnueabihf/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 /app/usr/arm-linux-gnueabihf/lib
   # Download MCPI Separately At Installation-Time
   - name: mcpi
     buildsystem: simple
