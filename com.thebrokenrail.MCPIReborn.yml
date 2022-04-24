@@ -56,9 +56,6 @@ modules:
       - -DMCPI_BUILD_MODE=both
       - -DMCPI_OPEN_SOURCE_ONLY=ON
       - -DMCPI_IS_APPIMAGE_BUILD=ON
-      # Use GCC
-      - -DCMAKE_C_COMPILER=gcc
-      - -DCMAKE_CXX_COMPILER=g++
     sources:
       - *mcpi-reborn-git
       - type: patch
