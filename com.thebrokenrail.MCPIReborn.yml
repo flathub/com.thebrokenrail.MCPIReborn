@@ -42,7 +42,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.3
+  tag: 2.3.5
   disable-shallow-clone: true
 
 # Build
@@ -144,7 +144,10 @@ modules:
       - -DMCPI_OPEN_SOURCE_ONLY=ON
       - -DMCPI_IS_APPIMAGE_BUILD=ON
       # ARM Toolchain
-      - -DCMAKE_TOOLCHAIN_FILE=flatpak-arm-toolchain.cmake
+      - -DCMAKE_SYSTEM_NAME=Linux
+      - -DCMAKE_C_COMPILER=arm-unknown-linux-gnueabihf-gcc
+      - -DCMAKE_CXX_COMPILER=arm-unknown-linux-gnueabihf-g++
+      - -DCMAKE_SYSTEM_PROCESSOR=arm
     build-options:
       prepend-path: /usr/lib/sdk/toolchain-arm/bin
       env:
@@ -153,8 +156,6 @@ modules:
         CXXFLAGS: ''
     sources:
       - *mcpi-reborn-git
-      - type: file
-        path: flatpak-arm-toolchain.cmake
   # Workaround https://github.com/hughsie/appstream-glib/issues/271
   - name: workaround-appstream-issue
     buildsystem: simple
