@@ -52,7 +52,6 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: cmake
     config-opts:
-      - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
       - -DMCPI_BUILD_MODE=both
       - -DMCPI_OPEN_SOURCE_ONLY=ON
       - -DMCPI_IS_APPIMAGE_BUILD=ON
