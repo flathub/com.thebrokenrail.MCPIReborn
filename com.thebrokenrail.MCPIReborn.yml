@@ -37,7 +37,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  commit: 9412c07c45c0e9107227d7e0f394a182d120c28c
+  tag: 2.3.6
   disable-shallow-clone: true
 
 # Build
