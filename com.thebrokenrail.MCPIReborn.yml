@@ -42,7 +42,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.6
+  tag: 2.3.7
   disable-shallow-clone: true
 
 # Build
@@ -113,10 +113,6 @@ modules:
       - -DCMAKE_CXX_COMPILER=g++
     sources:
       - *mcpi-reborn-git
-      - type: patch
-        path: glfw-wayland-build-fix.patch
-        options:
-          - --directory=dependencies/glfw/src
     # Nested Build
     modules:
       # FreeImage
