@@ -30,7 +30,6 @@ finish-args:
 
 # Multiarch
 sdk-extensions:
-  - org.freedesktop.Sdk.Compat.arm
   - org.freedesktop.Sdk.Extension.toolchain-arm
 
 # Desktop
@@ -115,18 +114,11 @@ modules:
       - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/run/build/minecraft-pi-reborn-native/armhf-sysroot
     sources:
       - *mcpi-reborn-git
-      # Multiarch Setup
-      ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
-      - type: shell
-        commands:
-          - mkdir -p armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libc.so.6 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libm.so.6 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libstdc++.so.6 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libgcc_s.so.1 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libpthread.so.0 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 armhf-sysroot/lib
-          - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 armhf-sysroot/lib
+      # Bundled ARMHF Sysroot
+      - type: archive
+        path: armhf-sysroot.tar.gz
+        dest: armhf-sysroot
+        strip-components: 0
     # Nested Build
     modules:
       # FreeImage
