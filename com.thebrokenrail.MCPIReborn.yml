@@ -42,7 +42,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.7
+  tag: 2.3.9
   disable-shallow-clone: true
 
 # Build
@@ -102,7 +102,7 @@ modules:
         tag: 0.14.3
   # MCPI-Reborn Native Code
   - name: minecraft-pi-reborn-native
-    buildsystem: cmake
+    buildsystem: cmake-ninja
     config-opts:
       - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
       - -DMCPI_BUILD_MODE=native
@@ -111,8 +111,22 @@ modules:
       # Use GCC
       - -DCMAKE_C_COMPILER=gcc
       - -DCMAKE_CXX_COMPILER=g++
+      # Specify Bundled ARMHF Sysroot
+      - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/run/build/minecraft-pi-reborn-native/armhf-sysroot
     sources:
       - *mcpi-reborn-git
+      # Multiarch Setup
+      ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
+      - type: shell
+        commands:
+          - mkdir -p armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libc.so.6 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libm.so.6 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libstdc++.so.6 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libgcc_s.so.1 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libpthread.so.0 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 armhf-sysroot/lib
+          - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 armhf-sysroot/lib
     # Nested Build
     modules:
       # FreeImage
@@ -133,7 +147,7 @@ modules:
               - sed -i 's|/usr|/app|' ./Makefile.gnu
   # MCPI-Reborn ARM Code
   - name: minecraft-pi-reborn-arm
-    buildsystem: cmake
+    buildsystem: cmake-ninja
     config-opts:
       - -DMCPI_USE_MEDIA_LAYER_PROXY=ON
       - -DMCPI_BUILD_MODE=arm
@@ -166,19 +180,6 @@ modules:
       - sed -i 's/<\/component>/<releases><release version="Release" date="2000-01-01"><\/release><\/releases><\/component>/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
     ensure-writable:
       - /share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
-  # Multiarch Setup
-  ## There is no platform equivalent of "org.freedesktop.Sdk.Compat.arm" so this copies required ARM libraries into the final Flatpak.
-  - name: multiarch-setup
-    buildsystem: simple
-    build-commands:
-      - cp -Lp /lib/arm-linux-gnueabihf/libc.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libm.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libstdc++.so.6 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libgcc_s.so.1 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libpthread.so.0 /app/lib/minecraft-pi-reborn-client/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/libdl.so.2 /app/lib/minecraft-pi-reborn-client/lib
-      - mkdir -p /app/usr/arm-linux-gnueabihf/lib
-      - cp -Lp /lib/arm-linux-gnueabihf/ld-linux-armhf.so.3 /app/usr/arm-linux-gnueabihf/lib
   # Download MCPI Separately At Installation-Time
   - name: mcpi
     buildsystem: simple
