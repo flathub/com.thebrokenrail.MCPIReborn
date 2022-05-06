@@ -30,6 +30,7 @@ finish-args:
 
 # Multiarch
 sdk-extensions:
+  - org.freedesktop.Sdk.Compat.arm
   - org.freedesktop.Sdk.Extension.toolchain-arm
 
 # Desktop
