@@ -112,8 +112,9 @@ modules:
       - name: freeimage
         no-autogen: true
         build-options:
+          cflags: -fPIC
           # C++17 Isn't Supported
-          cxxflags: -std=c++14
+          cxxflags: -std=c++14 -fPIC
         make-args:
           - DESTDIR=/app
         sources:
