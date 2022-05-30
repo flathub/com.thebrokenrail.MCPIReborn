@@ -9,8 +9,7 @@ tags:
 
 # Runtime/SDK
 runtime: org.freedesktop.Platform
-# Newer Runtimes Don't Support ARM Multiarch
-runtime-version: '19.08'
+runtime-version: '21.08'
 sdk: org.freedesktop.Sdk
 
 # Startup Command
@@ -28,11 +27,6 @@ finish-args:
   - --allow=multiarch
   - --env=APPDIR=/app
 
-# Multiarch
-sdk-extensions:
-  - org.freedesktop.Sdk.Compat.arm
-  - org.freedesktop.Sdk.Extension.toolchain-arm
-
 # Desktop
 rename-desktop-file: com.thebrokenrail.MCPIRebornClient.desktop
 rename-icon: com.thebrokenrail.MCPIRebornClient
@@ -42,7 +36,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  commit: 524a390921721d828fbfd046b360162c55cf9a92
+  tag: 2.3.11
   disable-shallow-clone: true
 
 # Build
@@ -139,24 +133,59 @@ modules:
       - -DMCPI_OPEN_SOURCE_ONLY=ON
       # ARM Toolchain
       - -DCMAKE_SYSTEM_NAME=Linux
-      - -DCMAKE_C_COMPILER=arm-unknown-linux-gnueabihf-gcc
-      - -DCMAKE_CXX_COMPILER=arm-unknown-linux-gnueabihf-g++
+      - -DCMAKE_C_COMPILER=/run/build/minecraft-pi-reborn-arm/armhf-toolchain/bin/arm-none-linux-gnueabihf-gcc
+      - -DCMAKE_CXX_COMPILER=/run/build/minecraft-pi-reborn-arm/armhf-toolchain/bin/arm-none-linux-gnueabihf-g++
       - -DCMAKE_SYSTEM_PROCESSOR=arm
       # Specify Bundled ARMHF Sysroot
       - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/run/build/minecraft-pi-reborn-arm/armhf-sysroot
     build-options:
-      prepend-path: /usr/lib/sdk/toolchain-arm/bin
       env:
         # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
         CFLAGS: ''
         CXXFLAGS: ''
     sources:
       - *mcpi-reborn-git
-      # Bundled ARMHF Sysroot
+      # ARM Toolchain
       - type: archive
-        path: armhf-sysroot.tar.gz
-        dest: armhf-sysroot
-        strip-components: 0
+        only-arches:
+          - x86_64
+        url: https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz
+        sha256: c254f7199261fe76c32ef42187502839bda7efad0a66646cf739d074eff45fad
+        dest: armhf-toolchain
+      - type: archive
+        only-arches:
+          - aarch64
+        url: https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-aarch64-arm-none-linux-gnueabihf.tar.xz
+        sha256: c5603772af016008ddacb7e475dc226d0cccdf069925dfded43e452a59774fc3
+        dest: armhf-toolchain
+      # MCPI Sysroot
+      - type: shell
+        commands:
+          - mkdir armhf-sysroot
+          - mkdir armhf-sysroot/lib
+          - mkdir -p armhf-sysroot/usr/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/ld-linux-armhf.so.3 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libanl.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_hesiod.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libdl.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libc_malloc_debug.so.0 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libpcprofile.so armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libthread_db.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libBrokenLocale.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libmemusage.so armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libc.so.6 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libresolv.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/librt.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libutil.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libgcc_s.so.1 armhf-sysroot/usr/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnsl.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libcrypt.so.1 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libm.so.6 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libpthread.so.0 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_compat.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_dns.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_files.so.2 armhf-sysroot/lib
+          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libstdc++.so.6 armhf-sysroot/usr/lib
   # Workaround https://github.com/hughsie/appstream-glib/issues/271
   - name: workaround-appstream-issue
     buildsystem: simple
