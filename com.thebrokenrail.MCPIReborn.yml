@@ -36,7 +36,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.11
+  tag: 2.3.12
   disable-shallow-clone: true
 
 # Build
@@ -111,6 +111,9 @@ modules:
       # FreeImage
       - name: freeimage
         no-autogen: true
+        config-opts:
+          # The runtime's version of libpng doesn't support ARM NEON
+          - --enable-arm-neon=no
         build-options:
           cflags: -fPIC
           # C++17 Isn't Supported
