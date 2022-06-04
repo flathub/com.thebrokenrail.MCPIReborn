@@ -111,13 +111,11 @@ modules:
       # FreeImage
       - name: freeimage
         no-autogen: true
-        config-opts:
-          # The runtime's version of libpng doesn't support ARM NEON
-          - --enable-arm-neon=no
         build-options:
-          cflags: -fPIC
+          # Fix ARM64 Build
+          cflags: -fPIC -DPNG_ARM_NEON_OPT=0
           # C++17 Isn't Supported
-          cxxflags: -std=c++14 -fPIC
+          cxxflags: -std=c++14 -fPIC -DPNG_ARM_NEON_OPT=0
         make-args:
           - DESTDIR=/app
         sources:
