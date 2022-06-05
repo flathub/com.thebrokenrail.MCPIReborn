@@ -36,7 +36,7 @@ rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.12
+  tag: 2.3.13
   disable-shallow-clone: true
 
 # Build
@@ -160,7 +160,7 @@ modules:
         url: https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-aarch64-arm-none-linux-gnueabihf.tar.xz
         sha256: c5603772af016008ddacb7e475dc226d0cccdf069925dfded43e452a59774fc3
         dest: armhf-toolchain
-      # MCPI Sysroot
+      # ARM Sysroot
       - type: shell
         commands:
           - mkdir armhf-sysroot
@@ -188,12 +188,6 @@ modules:
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_dns.so.2 armhf-sysroot/lib
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_files.so.2 armhf-sysroot/lib
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libstdc++.so.6 armhf-sysroot/usr/lib
-  # Workaround https://github.com/hughsie/appstream-glib/issues/271
-  - name: workaround-appstream-issue
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /app/usr/share/icons/hicolor/scalable/apps
-      - ln -s ../../../../../../share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png /app/usr/share/icons/hicolor/scalable/apps/com.thebrokenrail.MCPIReborn.png
   # Fix AppStream ID
   - name: fix-appstream-id
     buildsystem: simple
