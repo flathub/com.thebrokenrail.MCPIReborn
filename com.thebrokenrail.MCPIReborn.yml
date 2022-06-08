@@ -112,10 +112,12 @@ modules:
       - name: freeimage
         no-autogen: true
         build-options:
-          # Fix ARM64 Build
-          cflags: -fPIC -DPNG_ARM_NEON_OPT=0
-          # C++17 Isn't Supported
-          cxxflags: -std=c++14 -fPIC -DPNG_ARM_NEON_OPT=0
+          cxxflags: -std=c++14
+          arch:
+            aarch64:
+              # See https://sourceforge.net/p/freeimage/bugs/325/
+              cflags: -fPIC -DPNG_ARM_NEON_OPT=0
+              cxxflags: -fPIC
         make-args:
           - DESTDIR=/app
         sources:
@@ -219,3 +221,4 @@ modules:
 cleanup:
   - /include
   - /lib/pkgconfig
+  - '*.a'
