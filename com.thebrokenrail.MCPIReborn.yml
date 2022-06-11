@@ -27,16 +27,11 @@ finish-args:
   - --allow=multiarch
   - --env=APPDIR=/app
 
-# Desktop
-rename-desktop-file: com.thebrokenrail.MCPIRebornClient.desktop
-rename-icon: com.thebrokenrail.MCPIRebornClient
-rename-appdata-file: com.thebrokenrail.MCPIRebornClient.appdata.xml
-
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.3.13
+  commit: 6ba86b9193054b27907d2083177ed8589cd10bc9
   disable-shallow-clone: true
 
 # Build
@@ -104,6 +99,8 @@ modules:
       # Use GCC
       - -DCMAKE_C_COMPILER=gcc
       - -DCMAKE_CXX_COMPILER=g++
+      # App ID
+      - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
     sources:
       - *mcpi-reborn-git
     # Nested Build
@@ -142,6 +139,8 @@ modules:
       - -DCMAKE_SYSTEM_PROCESSOR=arm
       # Specify Bundled ARMHF Sysroot
       - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/run/build/minecraft-pi-reborn-arm/armhf-sysroot
+      # App ID
+      - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
     build-options:
       env:
         # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
@@ -190,14 +189,6 @@ modules:
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_dns.so.2 armhf-sysroot/lib
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_files.so.2 armhf-sysroot/lib
           - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libstdc++.so.6 armhf-sysroot/usr/lib
-  # Fix AppStream ID
-  - name: fix-appstream-id
-    buildsystem: simple
-    build-commands:
-      - sed -i 's/MCPIRebornClient/MCPIReborn/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
-      - sed -i 's/<\/component>/<releases><release version="Release" date="2000-01-01"><\/release><\/releases><\/component>/g' /app/share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
-    ensure-writable:
-      - /share/metainfo/com.thebrokenrail.MCPIRebornClient.appdata.xml
   # Download MCPI Separately At Installation-Time
   - name: mcpi
     buildsystem: simple
