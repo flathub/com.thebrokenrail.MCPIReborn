@@ -25,13 +25,12 @@ finish-args:
   - --device=dri
   - --socket=pulseaudio
   - --allow=multiarch
-  - --env=APPDIR=/app
 
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  commit: 13ac816baadd0ae82fa05e91a36b6a0fb5ef7b67
+  commit: f1ec29ec86f6ef34f30d4ef738b68f71663da467
   disable-shallow-clone: true
 
 # Build
@@ -99,6 +98,8 @@ modules:
       # Use GCC
       - -DCMAKE_C_COMPILER=gcc
       - -DCMAKE_CXX_COMPILER=g++
+      # Specify Bundled ARMHF Sysroot (Only Needed In ARM Build, So Use NULL)
+      - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/dev/null
       # App ID
       - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
     sources:
@@ -164,33 +165,28 @@ modules:
       # ARM Sysroot
       - type: shell
         commands:
-          - mkdir armhf-sysroot
-          - mkdir armhf-sysroot/lib
-          - mkdir -p armhf-sysroot/usr/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/ld-linux-armhf.so.3 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libanl.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_hesiod.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libdl.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libc_malloc_debug.so.0 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libpcprofile.so armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libthread_db.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libBrokenLocale.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libmemusage.so armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libc.so.6 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libresolv.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/librt.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libutil.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libgcc_s.so.1 armhf-sysroot/usr/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnsl.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libcrypt.so.1 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libm.so.6 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libpthread.so.0 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_compat.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_dns.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/lib/libnss_files.so.2 armhf-sysroot/lib
-          - cp -aL armhf-toolchain/arm-none-linux-gnueabihf/libc/usr/lib/libstdc++.so.6 armhf-sysroot/usr/lib
+          # Copy LibC From Toolchain
+          - cp -ar armhf-toolchain/arm-none-linux-gnueabihf/libc armhf-sysroot
+          # Remove Unneeded Files
+          - rm -rf armhf-sysroot/usr/include
+          - rm -rf armhf-sysroot/etc
+          - rm -rf armhf-sysroot/var
+          - rm -rf armhf-sysroot/sbin
+          - rm -rf armhf-sysroot/usr/bin
+          - rm -rf armhf-sysroot/usr/libexec
+          - rm -rf armhf-sysroot/usr/sbin
+          - rm -rf armhf-sysroot/usr/share
+          - rm -rf armhf-sysroot/usr/lib/gconv
+          - rm -rf armhf-sysroot/usr/lib/audit
+          # Remove Static And Object Files
+          - find armhf-sysroot -type f -name '*.a' -delete
+          - find armhf-sysroot -type f -name '*.o' -delete
+          # Remove Binaries
+          - find armhf-sysroot -type f -executable -not -name '*.so*' -delete
+          # Strip
+          - find armhf-sysroot -type f -executable -name '*.so*' -exec armhf-toolchain/bin/arm-none-linux-gnueabihf-strip {} \;
   # Download MCPI Separately At Installation-Time
-  - name: mcpi
+  - name: minecraft-pi
     buildsystem: simple
     build-commands:
       - install -Dm755 apply_extra /app/bin/apply_extra
