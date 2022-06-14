@@ -30,7 +30,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  commit: f1ec29ec86f6ef34f30d4ef738b68f71663da467
+  commit: ca218770006f19f4082e573c66cfb65d2dbdd29b
   disable-shallow-clone: true
 
 # Build
@@ -104,28 +104,6 @@ modules:
       - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
     sources:
       - *mcpi-reborn-git
-    # Nested Build
-    modules:
-      # FreeImage
-      - name: freeimage
-        no-autogen: true
-        build-options:
-          cxxflags: -std=c++14
-          arch:
-            aarch64:
-              # See https://sourceforge.net/p/freeimage/bugs/325/
-              cflags: -fPIC -DPNG_ARM_NEON_OPT=0
-              cxxflags: -fPIC
-        make-args:
-          - DESTDIR=/app
-        sources:
-          - type: archive
-            url: http://downloads.sourceforge.net/freeimage/FreeImage3180.zip
-            sha256: f41379682f9ada94ea7b34fe86bf9ee00935a3147be41b6569c9605a53e438fd
-          - type: shell
-            commands:
-              - sed -i 's|-o root -g root ||' ./Makefile.gnu
-              - sed -i 's|/usr|/app|' ./Makefile.gnu
   # MCPI-Reborn ARM Code
   - name: minecraft-pi-reborn-arm
     buildsystem: cmake-ninja
