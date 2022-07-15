@@ -30,7 +30,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  commit: ca218770006f19f4082e573c66cfb65d2dbdd29b
+  tag: 2.4.0
   disable-shallow-clone: true
 
 # Build
@@ -82,49 +82,28 @@ modules:
         sha256: 68e15d8e45ac56326e0b9a4afa8b49a3dfe8aba3488221d098c84698bca65b45
       - type: patch
         path: qemu-arm.patch
-  # patchelf
-  - name: patchelf
-    sources:
-      - type: git
-        url: https://github.com/NixOS/patchelf.git
-        tag: 0.14.3
-  # MCPI-Reborn Native Code
-  - name: minecraft-pi-reborn-native
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DMCPI_IS_MIXED_BUILD=ON
-      - -DMCPI_BUILD_MODE=native
-      - -DMCPI_OPEN_SOURCE_ONLY=ON
-      # Use GCC
-      - -DCMAKE_C_COMPILER=gcc
-      - -DCMAKE_CXX_COMPILER=g++
-      # Specify Bundled ARMHF Sysroot (Only Needed In ARM Build, So Use NULL)
-      - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/dev/null
-      # App ID
-      - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
-    sources:
-      - *mcpi-reborn-git
-  # MCPI-Reborn ARM Code
-  - name: minecraft-pi-reborn-arm
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DMCPI_IS_MIXED_BUILD=ON
-      - -DMCPI_BUILD_MODE=arm
-      - -DMCPI_OPEN_SOURCE_ONLY=ON
-      # ARM Toolchain
-      - -DCMAKE_SYSTEM_NAME=Linux
-      - -DCMAKE_C_COMPILER=/run/build/minecraft-pi-reborn-arm/armhf-toolchain/bin/arm-none-linux-gnueabihf-gcc
-      - -DCMAKE_CXX_COMPILER=/run/build/minecraft-pi-reborn-arm/armhf-toolchain/bin/arm-none-linux-gnueabihf-g++
-      - -DCMAKE_SYSTEM_PROCESSOR=arm
-      # Specify Bundled ARMHF Sysroot
-      - -DMCPI_CUSTOM_BUNDLED_ARMHF_SYSROOT=/run/build/minecraft-pi-reborn-arm/armhf-sysroot
-      # App ID
-      - -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
+  # MCPI-Reborn
+  - name: minecraft-pi-reborn
+    buildsystem: simple
+    build-commands:
+      - ./scripts/setup.sh client ${MCPI_ARCH} -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
+      - ./scripts/build.sh client ${MCPI_ARCH}
+      # FreeDesktop SDK Doesn't Contain Rsync
+      - cd ./out/client-${MCPI_ARCH}/app && find . -type d -exec mkdir -p /app/{} \;
+      - cd ./out/client-${MCPI_ARCH}/app && find . \( -type f -o -type l \) -exec cp -a {} /app/{} \;
     build-options:
       env:
         # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
         CFLAGS: ''
         CXXFLAGS: ''
+      # Target Architecture
+      arch:
+        x86_64:
+          env:
+            MCPI_ARCH: 'amd64'
+        aarch64:
+          env:
+            MCPI_ARCH: 'arm64'
     sources:
       - *mcpi-reborn-git
       # ARM Toolchain
@@ -133,36 +112,29 @@ modules:
           - x86_64
         url: https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz
         sha256: c254f7199261fe76c32ef42187502839bda7efad0a66646cf739d074eff45fad
-        dest: armhf-toolchain
+        dest: cmake/.prebuilt-armhf-toolchain
       - type: archive
         only-arches:
           - aarch64
         url: https://developer.arm.com/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-aarch64-arm-none-linux-gnueabihf.tar.xz
         sha256: c5603772af016008ddacb7e475dc226d0cccdf069925dfded43e452a59774fc3
-        dest: armhf-toolchain
-      # ARM Sysroot
-      - type: shell
-        commands:
-          # Copy LibC From Toolchain
-          - cp -ar armhf-toolchain/arm-none-linux-gnueabihf/libc armhf-sysroot
-          # Remove Unneeded Files
-          - rm -rf armhf-sysroot/usr/include
-          - rm -rf armhf-sysroot/etc
-          - rm -rf armhf-sysroot/var
-          - rm -rf armhf-sysroot/sbin
-          - rm -rf armhf-sysroot/usr/bin
-          - rm -rf armhf-sysroot/usr/libexec
-          - rm -rf armhf-sysroot/usr/sbin
-          - rm -rf armhf-sysroot/usr/share
-          - rm -rf armhf-sysroot/usr/lib/gconv
-          - rm -rf armhf-sysroot/usr/lib/audit
-          # Remove Static And Object Files
-          - find armhf-sysroot -type f -name '*.a' -delete
-          - find armhf-sysroot -type f -name '*.o' -delete
-          # Remove Binaries
-          - find armhf-sysroot -type f -executable -not -name '*.so*' -delete
-          # Strip
-          - find armhf-sysroot -type f -executable -name '*.so*' -exec armhf-toolchain/bin/arm-none-linux-gnueabihf-strip {} \;
+        dest: cmake/.prebuilt-armhf-toolchain
+    modules:
+      # XXD
+      - name: xxd
+        buildsystem: simple
+        build-commands:
+          - make -C src/xxd
+          - install -Dm755 -t /app/bin src/xxd/xxd
+        sources:
+          - type: archive
+            url: https://github.com/vim/vim/archive/v9.0.0049/vim-v9.0.0049.tar.gz
+            sha256: d1e75adce8c684ea0f0939406ab7c0f500a68c4b16ab46e16ddf9dbee75d530b
+            x-checker-data:
+              type: anitya
+              project-id: 5092
+              stable-only: true
+              url-template: https://github.com/vim/vim/archive/v$version/vim-v$version.tar.gz
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
@@ -187,3 +159,4 @@ cleanup:
   - /include
   - /lib/pkgconfig
   - '*.a'
+  - /bin/xxd
