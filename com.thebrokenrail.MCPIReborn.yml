@@ -30,7 +30,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/TheBrokenRail/minecraft-pi-reborn.git
-  tag: 2.4.1
+  tag: 2.4.2
   disable-shallow-clone: true
 
 # Build
@@ -40,46 +40,13 @@ modules:
     config-opts:
       - --prefix=/app
       - --target-list=arm-linux-user
-      - --enable-linux-user
-      - --disable-debug-info
-      - --disable-bsd-user
-      - --disable-werror
-      - --disable-system
-      - --disable-tools
-      - --disable-docs
-      - --disable-gtk
-      - --disable-gnutls
-      - --disable-nettle
-      - --disable-gcrypt
-      - --disable-glusterfs
-      - --disable-libnfs
-      - --disable-libiscsi
-      - --disable-vnc
-      - --disable-kvm
-      - --disable-libssh
-      - --disable-libxml2
-      - --disable-vde
-      - --disable-sdl
-      - --disable-opengl
-      - --disable-xen
-      - --disable-fdt
-      - --disable-vhost-net
-      - --disable-vhost-crypto
-      - --disable-vhost-user
-      - --disable-vhost-vsock
-      - --disable-vhost-scsi
-      - --disable-tpm
-      - --disable-qom-cast-debug
-      - --disable-capstone
-      - --disable-zstd
-      - --disable-linux-io-uring
-      - --disable-bpf
+      - --without-default-features
     cleanup:
       - /share
     sources:
       - type: archive
-        url: https://download.qemu.org/qemu-6.2.0.tar.xz
-        sha256: 68e15d8e45ac56326e0b9a4afa8b49a3dfe8aba3488221d098c84698bca65b45
+        url: https://download.qemu.org/qemu-7.0.0.tar.xz
+        sha256: f6b375c7951f728402798b0baabb2d86478ca53d44cedbefabbe1c46bf46f839
       - type: patch
         path: qemu-arm.patch
   # MCPI-Reborn
@@ -87,10 +54,7 @@ modules:
     buildsystem: simple
     build-commands:
       - ./scripts/setup.sh client ${MCPI_ARCH} -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
-      - ./scripts/build.sh client ${MCPI_ARCH}
-      # FreeDesktop SDK Doesn't Contain Rsync
-      - cd ./out/client-${MCPI_ARCH}/app && find . -type d -exec mkdir -p /app/{} \;
-      - cd ./out/client-${MCPI_ARCH}/app && find . \( -type f -o -type l \) -exec cp -a {} /app/{} \;
+      - DESTDIR= ./scripts/build.sh client ${MCPI_ARCH}
     build-options:
       env:
         # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
@@ -119,17 +83,6 @@ modules:
         url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-aarch64-arm-none-linux-gnueabihf.tar.xz
         sha256: fccd7af76988da2b077f939eb2a78baa9935810918d2bf3f837bc74f52efa825
         dest: cmake/.prebuilt-armhf-toolchain
-    modules:
-      # XXD
-      - name: xxd
-        buildsystem: simple
-        build-commands:
-          - make -C src/xxd
-          - install -Dm755 -t /app/bin src/xxd/xxd
-        sources:
-          - type: archive
-            url: https://github.com/vim/vim/archive/v9.0.0057/vim-v9.0.0057.tar.gz
-            sha256: 25443f1480513cdb74b8005a4c649b84d86d431641699f895f92e654e3898f6a
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
@@ -154,4 +107,3 @@ cleanup:
   - /include
   - /lib/pkgconfig
   - '*.a'
-  - /bin/xxd
