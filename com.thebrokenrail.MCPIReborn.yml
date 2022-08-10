@@ -30,7 +30,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-  commit: 4ab6b7aed1b0b27edabcdf8e6b4a0e6c398cdd8b
+  commit: 35cafec1ee0e7e2f4b4a08c19522e3b97a629618
   disable-shallow-clone: true
 
 # Build
@@ -53,16 +53,13 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
-      - ./scripts/setup.sh client ${MCPI_ARCH} -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
-      - DESTDIR= ./scripts/build.sh client ${MCPI_ARCH}
+      - ./scripts/setup.sh client "${MCPI_ARCH}" -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn "-DFETCHCONTENT_SOURCE_DIR_PREBUILT-ARMHF-TOOLCHAIN=${PWD}/prebuilt-armhf-toolchain"
+      - DESTDIR= ./scripts/build.sh client "${MCPI_ARCH}"
     build-options:
       env:
         # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
         CFLAGS: ''
         CXXFLAGS: ''
-      # Network Access
-      build-args:
-        - --share=network
       # Target Architecture
       arch:
         x86_64:
@@ -73,6 +70,19 @@ modules:
             MCPI_ARCH: 'arm64'
     sources:
       - *mcpi-reborn-git
+      # ARM Toolchain
+      - type: archive
+        only-arches:
+          - x86_64
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf.tar.xz
+        sha256: aa074fa8371a4f73fecbd16bd62c8b1945f23289e26414794f130d6ccdf8e39c
+        dest: prebuilt-armhf-toolchain
+      - type: archive
+        only-arches:
+          - aarch64
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-aarch64-arm-none-linux-gnueabihf.tar.xz
+        sha256: fccd7af76988da2b077f939eb2a78baa9935810918d2bf3f837bc74f52efa825
+        dest: prebuilt-armhf-toolchain
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
