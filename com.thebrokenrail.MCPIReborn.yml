@@ -37,6 +37,8 @@ x-mcpi-reborn-git: &mcpi-reborn-git
 modules:
   # QEMU
   - name: qemu-arm
+    only-arches:
+      - x86_64
     config-opts:
       - --prefix=/app
       - --target-list=arm-linux-user
