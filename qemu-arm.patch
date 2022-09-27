@@ -1,5 +1,5 @@
---- a/meson.build
-+++ b/meson.build
+--- a/dependencies/qemu/src/meson.build
++++ b/dependencies/qemu/src/meson.build
 @@ -1505,7 +1505,6 @@ config_host_data.set('CONFIG_EPOLL', cc.has_header('sys/epoll.h'))
  config_host_data.set('CONFIG_LINUX_MAGIC_H', cc.has_header('linux/magic.h'))
  config_host_data.set('CONFIG_VALGRIND_H', cc.has_header('valgrind/valgrind.h'))
