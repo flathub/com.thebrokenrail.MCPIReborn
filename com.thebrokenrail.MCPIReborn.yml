@@ -81,7 +81,7 @@ modules:
     sources:
       - type: extra-data
         filename: mcpi.tar.gz
-        url: https://s3.amazonaws.com/assets.minecraft.net/pi/minecraft-pi-0.1.1.tar.gz
+        url: https://archive.org/download/MinecraftPi/minecraft-pi-0.1.1.tar.gz
         sha256: e0d68918874cdd403de1fd399380ae2930913fcefdbf60a3fbfebb62e2cfacab
         size: 1459472
       - type: script
