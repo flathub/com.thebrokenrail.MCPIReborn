@@ -39,6 +39,8 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
+      - rm -rf dependencies/qemu/src
+      - mv qemu-archive dependencies/qemu/src
       - ./scripts/setup.sh client "${MCPI_ARCH}" -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn "-DFETCHCONTENT_SOURCE_DIR_PREBUILT-ARMHF-TOOLCHAIN=${PWD}/prebuilt-armhf-toolchain"
       - DESTDIR= ./scripts/build.sh client "${MCPI_ARCH}"
     build-options:
@@ -71,6 +73,11 @@ modules:
         url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.3-2021.07/binrel/gcc-arm-10.3-2021.07-aarch64-arm-none-linux-gnueabihf.tar.xz
         sha256: fccd7af76988da2b077f939eb2a78baa9935810918d2bf3f837bc74f52efa825
         dest: prebuilt-armhf-toolchain
+      # Use QEMU Archive Instead Of Submodule Because Of Flathub Stupidly Blocking Internet Access
+      - type: archive
+        url: https://download.qemu.org/qemu-8.1.2.tar.xz
+        sha256: 541526a764576eb494d2ff5ec46aeb253e62ea29035d1c23c0a8af4e6cd4f087
+        dest: qemu-archive
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
