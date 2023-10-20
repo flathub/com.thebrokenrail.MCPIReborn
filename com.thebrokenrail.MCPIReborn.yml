@@ -39,6 +39,7 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
+      - sed -i 's/libdrm/libdrm-dis/g' qemu-archive/meson.build
       - rm -rf dependencies/qemu/src
       - mv qemu-archive dependencies/qemu/src
       - ./scripts/setup.sh client "${MCPI_ARCH}" -DCMAKE_INSTALL_PREFIX=/app -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn "-DFETCHCONTENT_SOURCE_DIR_PREBUILT-ARMHF-TOOLCHAIN=${PWD}/prebuilt-armhf-toolchain"
@@ -58,8 +59,6 @@ modules:
             MCPI_ARCH: 'arm64'
     sources:
       - *mcpi-reborn-git
-      - type: patch
-        path: qemu-arm.patch
       # ARM Toolchain
       - type: archive
         only-arches:
