@@ -19,7 +19,7 @@ command: minecraft-pi-reborn-client
 finish-args:
   - --persist=.minecraft-pi
   - --share=ipc
-  - --socket=x11
+  - --socket=fallback-x11
   - --socket=wayland
   - --share=network
   - --device=dri
