@@ -11,6 +11,8 @@ tags:
 runtime: org.freedesktop.Platform
 runtime-version: '23.08'
 sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node18
 
 # Startup Command
 command: minecraft-pi-reborn-client
@@ -28,10 +30,10 @@ finish-args:
 
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
-  type: git
-  url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-  tag: flatpak
-  disable-shallow-clone: true
+    type: git
+    url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
+    branch: master
+    disable-shallow-clone: true
 
 # Build
 modules:
@@ -39,23 +41,19 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
-      - ./scripts/setup.sh client "${MCPI_ARCH}" -DMCPI_IS_FLATPAK_BUILD=ON -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
-      - DESTDIR= ./scripts/build.sh client "${MCPI_ARCH}"
+      - ./scripts/build.mjs flatpak client host --install -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
     build-options:
-      env:
-        # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
-        CFLAGS: ''
-        CXXFLAGS: ''
-      # Target Architecture
-      arch:
-        x86_64:
-          env:
-            MCPI_ARCH: 'amd64'
-        aarch64:
-          env:
-            MCPI_ARCH: 'arm64'
+        append-path: /usr/lib/sdk/node18/bin
+        env:
+            # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
+            CFLAGS: ''
+            CXXFLAGS: ''
+            # Node.js Packages
+            npm_config_cache: /run/build/minecraft-pi-reborn/flatpak-node/npm-cache
     sources:
       - *mcpi-reborn-git
+      # Node.js Dependencies (Generated With flatpak-node-generator)
+      - generated-sources.json
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
