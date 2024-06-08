@@ -26,12 +26,13 @@ finish-args:
   - --share=network
   - --device=dri
   - --socket=pulseaudio
+  - --allow=multiarch
 
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 04b9ad5efda437c7ce551b86523c1cf09a16ef2f
+    commit: a0f32a15a7e7077c775474c37e784803d3a152f5
     disable-shallow-clone: true
 
 # Build
