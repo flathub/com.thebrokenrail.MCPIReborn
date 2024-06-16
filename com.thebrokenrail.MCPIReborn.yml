@@ -15,7 +15,7 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.node18
 
 # Startup Command
-command: minecraft-pi-reborn-client
+command: minecraft-pi-reborn
 
 # Permissions
 finish-args:
