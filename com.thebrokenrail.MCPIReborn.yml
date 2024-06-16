@@ -32,7 +32,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 74ee75e12fbf305a30de974eff7a5db2389c4a43
+    commit: 36fe263ede4e7b3d7341b703f73fbf88e164fa26
     disable-shallow-clone: true
 
 # Build
@@ -41,7 +41,7 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
-      - ./scripts/build.mjs flatpak client host --install -DMCPI_OPEN_SOURCE_ONLY=ON
+      - ./scripts/build.mjs flatpak host --install -DMCPI_OPEN_SOURCE_ONLY=ON
     build-options:
         append-path: /usr/lib/sdk/node18/bin
         env:
@@ -60,7 +60,7 @@ modules:
     build-commands:
       - install -Dm755 apply_extra /app/bin/apply_extra
       # Allow Starting MCPI
-      - ln -s ../../extra/minecraft-pi /app/lib/minecraft-pi-reborn-client/minecraft-pi
+      - ln -s ../../extra/minecraft-pi /app/lib/minecraft-pi-reborn/minecraft-pi
     sources:
       - type: extra-data
         filename: mcpi.tar.gz
