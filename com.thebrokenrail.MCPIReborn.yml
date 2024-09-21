@@ -43,7 +43,7 @@ modules:
     build-commands:
       - ./scripts/build.mjs flatpak host --install -DMCPI_OPEN_SOURCE_ONLY=ON
     build-options:
-        append-path: /usr/lib/sdk/node18/bin
+        append-path: /usr/lib/sdk/node20/bin
         env:
             # Node.js Packages
             npm_config_cache: /run/build/minecraft-pi-reborn/flatpak-node/npm-cache
