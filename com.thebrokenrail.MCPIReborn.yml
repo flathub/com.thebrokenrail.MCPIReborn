@@ -32,7 +32,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: f1fe1c140c8f453eba4badb15c8bd36fef1eb633
+    commit: 9bb6b86c739b886b7e97f4e51a84c5aa74f68bb8
     disable-shallow-clone: true
 
 # Build
@@ -45,9 +45,6 @@ modules:
     build-options:
         append-path: /usr/lib/sdk/node18/bin
         env:
-            # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
-            CFLAGS: ''
-            CXXFLAGS: ''
             # Node.js Packages
             npm_config_cache: /run/build/minecraft-pi-reborn/flatpak-node/npm-cache
     sources:
