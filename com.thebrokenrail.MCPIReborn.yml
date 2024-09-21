@@ -9,7 +9,7 @@ tags:
 
 # Runtime/SDK
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node18
@@ -32,7 +32,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 72e2c4947d728e3fc17bb87dc779955e3fcce64b
+    commit: 72eb1945cfd718399d26c82fc14ec67f6c53e17d
     disable-shallow-clone: true
 
 # Build
