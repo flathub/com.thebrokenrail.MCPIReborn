@@ -33,7 +33,6 @@ x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
     commit: 58a6706cf924caec9b659dd7914431b768c1d8f9
-    disable-shallow-clone: true
 
 # Build
 modules:
