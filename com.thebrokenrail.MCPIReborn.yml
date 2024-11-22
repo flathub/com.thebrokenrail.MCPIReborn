@@ -19,7 +19,6 @@ command: minecraft-pi-reborn
 
 # Permissions
 finish-args:
-  - --persist=.minecraft-pi
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
@@ -32,7 +31,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 58a6706cf924caec9b659dd7914431b768c1d8f9
+    commit: b2c13c82575f1877eccbdffeee505f43e846a0f7
 
 # Build
 modules:
