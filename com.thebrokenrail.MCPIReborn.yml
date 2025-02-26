@@ -30,7 +30,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
   type: git
   url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-  tag: flatpak
+  tag: 2.5.4
   disable-shallow-clone: true
 
 # Build
