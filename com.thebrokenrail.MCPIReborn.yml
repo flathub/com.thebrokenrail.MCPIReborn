@@ -9,15 +9,16 @@ tags:
 
 # Runtime/SDK
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node20
 
 # Startup Command
-command: minecraft-pi-reborn-client
+command: minecraft-pi-reborn
 
 # Permissions
 finish-args:
-  - --persist=.minecraft-pi
   - --share=ipc
   - --socket=fallback-x11
   - --socket=wayland
@@ -28,10 +29,9 @@ finish-args:
 
 # MCPI-Reborn Git
 x-mcpi-reborn-git: &mcpi-reborn-git
-  type: git
-  url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-  tag: flatpak
-  disable-shallow-clone: true
+    type: git
+    url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
+    commit: 426a35882fe234a6ac7e9fbd5186a35e9b01d2a7
 
 # Build
 modules:
@@ -39,30 +39,23 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
-      - ./scripts/setup.sh client "${MCPI_ARCH}" -DMCPI_IS_FLATPAK_BUILD=ON -DMCPI_OPEN_SOURCE_ONLY=ON -DMCPI_APP_ID=com.thebrokenrail.MCPIReborn
-      - DESTDIR= ./scripts/build.sh client "${MCPI_ARCH}"
+      - ./scripts/build.mjs flatpak host --install -DMCPI_OPEN_SOURCE_ONLY=ON
     build-options:
-      env:
-        # The Runtime Automatically Includes An x86_64-Only Flag, So Reset Flags
-        CFLAGS: ''
-        CXXFLAGS: ''
-      # Target Architecture
-      arch:
-        x86_64:
-          env:
-            MCPI_ARCH: 'amd64'
-        aarch64:
-          env:
-            MCPI_ARCH: 'arm64'
+        append-path: /usr/lib/sdk/node20/bin
+        env:
+            # Node.js Packages
+            npm_config_cache: /run/build/minecraft-pi-reborn/flatpak-node/npm-cache
     sources:
       - *mcpi-reborn-git
+      # Node.js Dependencies (Generated With flatpak-node-generator)
+      - generated-sources.json
   # Download MCPI Separately At Installation-Time
   - name: minecraft-pi
     buildsystem: simple
     build-commands:
       - install -Dm755 apply_extra /app/bin/apply_extra
       # Allow Starting MCPI
-      - ln -s ../../extra/minecraft-pi /app/lib/minecraft-pi-reborn-client/minecraft-pi
+      - ln -s ../../extra/minecraft-pi /app/lib/minecraft-pi-reborn/minecraft-pi
     sources:
       - type: extra-data
         filename: mcpi.tar.gz
