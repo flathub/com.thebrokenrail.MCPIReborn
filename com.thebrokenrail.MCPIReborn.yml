@@ -9,7 +9,7 @@ tags:
 
 # Runtime/SDK
 runtime: org.freedesktop.Platform
-runtime-version: '24.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.node20
@@ -31,7 +31,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 5975d165b0726b14c337f3056c83951305d07678
+    commit: 72480ab4c917d68614fa4e572d85aadaab808452
 
 # Build
 modules:
@@ -39,7 +39,7 @@ modules:
   - name: minecraft-pi-reborn
     buildsystem: simple
     build-commands:
-      - ./scripts/build.mjs flatpak host --install -DMCPI_OPEN_SOURCE_ONLY=ON
+      - ./scripts/build.mjs flatpak host --install
     build-options:
         append-path: /usr/lib/sdk/node20/bin
         env:
@@ -49,24 +49,6 @@ modules:
       - *mcpi-reborn-git
       # Node.js Dependencies (Generated With flatpak-node-generator)
       - generated-sources.json
-  # Download MCPI Separately At Installation-Time
-  - name: minecraft-pi
-    buildsystem: simple
-    build-commands:
-      - install -Dm755 apply_extra /app/bin/apply_extra
-      # Allow Starting MCPI
-      - ln -s ../../extra/minecraft-pi /app/lib/minecraft-pi-reborn/minecraft-pi
-    sources:
-      - type: extra-data
-        filename: mcpi.tar.gz
-        url: https://archive.org/download/MinecraftPi/minecraft-pi-0.1.1.tar.gz
-        sha256: e0d68918874cdd403de1fd399380ae2930913fcefdbf60a3fbfebb62e2cfacab
-        size: 1459472
-      - type: script
-        dest-filename: apply_extra
-        commands:
-          - tar -xf mcpi.tar.gz --strip-components 1
-          - rm -f mcpi.tar.gz
 
 # Cleanup
 cleanup:
