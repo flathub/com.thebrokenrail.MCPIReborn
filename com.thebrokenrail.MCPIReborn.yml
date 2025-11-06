@@ -49,6 +49,16 @@ modules:
       - *mcpi-reborn-git
       # Node.js Dependencies (Generated With flatpak-node-generator)
       - generated-sources.json
+    modules:
+      # QEMU Dependencies
+      - name: distlib
+        buildsystem: simple
+        build-commands:
+          - pip install --prefix=/app --no-build-isolation .
+        sources:
+          - type: archive
+            url: https://github.com/pypa/distlib/archive/refs/tags/0.4.0.tar.gz
+            sha256: 98fb21cbb8c43d3deafc688ff58e024e79712568e837407d16b7037cd28d0041
 
 # Cleanup
 cleanup:
