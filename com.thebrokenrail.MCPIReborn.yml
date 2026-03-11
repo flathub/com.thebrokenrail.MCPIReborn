@@ -31,7 +31,7 @@ finish-args:
 x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
-    commit: 584ae9dbb43aa3ecae041112582a3e656f403de1
+    tag: '3.0.0'
 
 # Build
 modules:
