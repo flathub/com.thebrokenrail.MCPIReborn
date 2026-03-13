@@ -32,7 +32,7 @@ x-mcpi-reborn-git: &mcpi-reborn-git
     type: git
     url: https://gitea.thebrokenrail.com/minecraft-pi-reborn/minecraft-pi-reborn.git
     tag: 3.0.0
-    commit: 8ca4fd1744d536dee74a9b3895d215f9bb736e1d
+    commit: 092cbcd590f46b1a956a52f4bffe17407f878126
 
 # Build
 modules:
